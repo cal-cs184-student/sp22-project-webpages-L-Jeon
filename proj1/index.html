@@ -44,7 +44,7 @@
     Then it moves onto the next line, and so on until all the lines that make up the triangle have been checked.</p>
   <h4 align="middle">Explain how your algorithm is no worse than one that checks each sample within the bounding box of the triangle.</h4>
   <p>Our algorithm is no worse than one that checks every sample in the triangle’s bounding box because it won’t ever check every single pixel in the bounding box. 
-    I think this is easier to demonstrate with a picture: see below.<\p>
+    I think this is easier to demonstrate with a picture: see below.</p>
     
     <div align="middle">
       <table style="width=100%">
@@ -69,7 +69,9 @@
             <img src="images/screenshot_2-6_19-8-48.png" align="middle" width="800px"/>
             <figcaption align="middle">basic/test4.svg with default viewing params.</figcaption>
           </td>
-          <br>
+          </tr>
+        <br>
+        <tr>
           <td>
             <img src="images/screenshot_2-6_19-9-8.png" align="middle" width="400px"/>
             <figcaption align="middle">Point of interest(?) #1: Green, upper-right triangle, bottom left corner.</figcaption>
@@ -103,6 +105,9 @@
         <img src="images/image3.png" align="middle" width="400px"/>
         <figcaption align="middle">Caption goes here.</figcaption>
       </td>
+    </tr>
+    <br>
+    <tr>
       <td>
         <img src="images/image4.png" align="middle" width="400px"/>
         <figcaption align="middle">Caption goes here.</figcaption>
@@ -117,7 +122,35 @@
 
 
 <h3 align="middle">Part 3: Transforms</h3>
+<h4 align="middle">•	Create an updated version of svg/transforms/robot.svg with cubeman doing something more interesting, 
+  like waving or running. Feel free to change his colors or proportions to suit your creativity. 
+  Save your svg file as my_robot.svg in your docs/ directory and show a png screenshot of your rendered drawing in your write-up. 
+  Explain what you were trying to do with cubeman in words.</h4>
 
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="images/screenshot_2-6_20-8-26.png" align="middle" width="600px"/>
+        </td>
+      </tr>
+    </table>
+  </div>
+  
+  <p><a href="https://www.ssbwiki.com/Ryu_(SSBU)#Taunts">"Talk is cheap,"</a> so here is a picture explaining what I tried to do instead:</p>
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="Screen Shot 2022-02-06 at 8.09.41 PM.png" align="middle" width="117px"/>
+        </td>
+      </tr>
+    </table>
+  </div>
+  
+  <p>I used Illustrator to pose the robot to my fancy, then copy/pasted those new values for the transforms of each of the shapes into the original robot svg file. 
+    I know one could go into the SVG file and hand-alter the values one-by-one as well, but that's not as fun. 
+    (Cubeman's red is also based on the color of Ryu's headband: it's slightly different from the default.)</p>
 
 
 <h2 align="middle">Section II: Sampling</h2>
