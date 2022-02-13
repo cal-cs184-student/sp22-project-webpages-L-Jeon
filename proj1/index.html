@@ -37,7 +37,52 @@
 <h2 align="middle">Section I: Rasterization</h2>
 
 <h3 align="middle">Part 1: Rasterizing single-color triangles</h3>
-
+  <h4 align="middle">Walk through how you rasterize triangles in your own words.</h4>
+  <p>In this part, we rasterized the triangles by utilizing the line test we went over in lecture. 
+    More specifically, our algorithm goes line by line, uses the line test to see if that sample lies 
+    within the triangle or not, and stops checking that line once it sees a sample that’s no longer in the triangle. 
+    Then it moves onto the next line, and so on until all the lines that make up the triangle have been checked.</p>
+  <h4 align="middle">Explain how your algorithm is no worse than one that checks each sample within the bounding box of the triangle.</h4>
+  <p>Our algorithm is no worse than one that checks every sample in the triangle’s bounding box because it won’t ever check every single pixel in the bounding box. 
+    I think this is easier to demonstrate with a picture: see below.<\p>
+    
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/Untitled-1.png" align="middle" width="600px"/>
+            <figcaption align="middle">This algorithm performs the same as the “check all samples” algorithm if the triangle is a 90-degree triangle with its 90-degree corner situated right at the upper right corner. 
+             In which case all samples will be checked, since we’re sweeping from left to right. 
+             But it performs no worse because it won’t ever check samples twice.</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+                    
+  <h4 align="middle">Show a png screenshot of basic/test4.svg with the default viewing parameters and with the pixel inspector centered on an interesting part of the scene.</h4>
+    <p>I don’t understand what part of this scene of colored triangles would qualify as “interesting”, so I took two screenshots just in case our tastes differ.</p>
+    
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="images/screenshot_2-6_19-8-48.png" align="middle" width="800px"/>
+            <figcaption align="middle">basic/test4.svg with default viewing params.</figcaption>
+          </td>
+          <br>
+          <td>
+            <img src="images/screenshot_2-6_19-9-8.png" align="middle" width="400px"/>
+            <figcaption align="middle">Point of interest(?) #1: Green, upper-right triangle, bottom left corner.</figcaption>
+          </td>
+          <td>
+            <img src="images/screenshot_2-6_19-9-13.png" align="middle" width="400px"/>
+            <figcaption align="middle">Point of interest(?) #2: Red, middle triangle, very right corner (kinda broken). 
+              (I mean, people often say broken things are interesting, so…)</figcaption>
+          </td>
+        </tr>
+      </table>
+    </div>
+    
 <p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
 
 <div align="middle">
