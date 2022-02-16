@@ -76,7 +76,10 @@
             <img src="images/screenshot_2-6_19-9-8.png" align="middle" width="400px"/>
             <figcaption align="middle">Point of interest(?) #1: Green, upper-right triangle, bottom left corner.</figcaption>
           </td>
-          <td>
+        </tr>
+        <br>
+        <tr>
+       		<td>
             <img src="images/screenshot_2-6_19-9-13.png" align="middle" width="400px"/>
             <figcaption align="middle">Point of interest(?) #2: Red, middle triangle, very right corner (kinda broken). 
               (I mean, people often say broken things are interesting, so…)</figcaption>
@@ -118,49 +121,13 @@
 
 
 <h3 align="middle">Part 2: Antialiasing triangles</h3>
-
-
-
-<h3 align="middle">Part 3: Transforms</h3>
-<h4 align="middle">Create an updated version of svg/transforms/robot.svg with cubeman doing something more interesting, 
-  like waving or running. Feel free to change his colors or proportions to suit your creativity. 
-  Save your svg file as my_robot.svg in your docs/ directory and show a png screenshot of your rendered drawing in your write-up. 
-  Explain what you were trying to do with cubeman in words.</h4>
-
-  <div align="middle">
-    <table style="width=100%">
-      <tr>
-        <td>
-          <img src="images/screenshot_2-6_20-8-26.png" align="middle" width="600px"/>
-        </td>
-      </tr>
-    </table>
-  </div>
-  
-  <p><a href="https://www.ssbwiki.com/Ryu_(SSBU)#Taunts">"Talk is cheap,"</a> so here is a picture explaining what I tried to do instead:</p>
-  <div align="middle">
-    <table style="width=100%">
-      <tr>
-        <td>
-          <img src="images/ryu.png" align="middle" width="117px"/>
-        </td>
-      </tr>
-    </table>
-  </div>
-  
-  <p>I used Illustrator to pose the robot to my fancy, then copy/pasted those new values for the transforms of each of the shapes into the original robot svg file. 
-    I know one could go into the SVG file and hand-alter the values one-by-one as well, but that's not as fun. 
-    (Cubeman's red is also based on the color of Ryu's headband: it's slightly different from the default.)</p>
-
-
-<h2 align="middle">Section II: Sampling</h2>
-
-<h3 align="middle">Part 4: Barycentric coordinates</h3>
 <h4 align="middle">Walk through your supersampling algorithm and data structures. Why is supersampling useful? What modifications did you make to the rasterization pipeline in the process? Explain how you used supersampling to antialias your triangles.</h4>
 
-	<p>For my implementation of supersampling, I decided to increase my sample buffer in set_sample_rate, artificially increasing my resolution. Then, in my rasterize_triangle I multiiplied every x and y by the square root of the sample rate and set up my box by picking the min and max x and y from these altered points and looping through my box as normal. (One key change I did was change the fill_pixel function to have y also be multiplied by the square root of sample rate since there are now more x’s in a row.)
+	<p>For our implementation of supersampling, we increased my sample buffer in set_sample_rate, artificially increasing the image's resolution (regarding how we sample the image). Then, in rasterize_triangle we multiiplied x and y by the square root of the sample rate--since the sample rate tells us how many samples we're taking in a box, the number of samples we're taking along the x and y increase by the square root.</p> 
 
-	The next thing I did was average the color values in resolve_to_framebuffer. Inside of the already existing double for loop, I put another nested double for loop with sx and sy for sample x and sample y which limits itself to being less than the square root of sample rate. I then go into the sample buffer, manually multiplying y by the square root of the sample rate, then adding sy, and following the rest of what we do in fill_pixel except for adding sx to the end and multiplying x by square root of sample rate. Finally I divided the end color pulled by sample rate to get the color I would use in frame_buffer. </p>
+	<p>We then set up the triangle's bounding box by picking the minimum and maximum x and y from these artificially blown-up points and looped through the triangle's bounding box as normal. One key change was made to the fill_pixel function, to have y also be multiplied by the square root of the sample rate to reflect the artificially-enlarged canvas we were "drawing" from.</p>
+
+	<p>Next, after taking these samples, we averaged the color values for each pixel in resolve_to_framebuffer. Inside of the already-existing double for loop, we put another nested double for loop to check the samples we'd gathered for each individual pixel. These samples are the very same ones we'd just put into the sample buffer. Pixel by pixel, we'd total all the data we'd collected together, then averaged them out according to the number of samples we'd collected (i.e. the sample rate). This value was then passed into the rgb_framebuffer_target like in the previous part, to be used to draw our now nicely super-sampled triangle. </p>
 
 <h4 align="middle">Show png screenshots of basic/test4.svg with the default viewing parameters and sample rates 1, 4, and 16 to compare them side-by-side. Position the pixel inspector over an area that showcases the effect dramatically; for example, a very skinny triangle corner.</h4>
 	
@@ -190,9 +157,63 @@
 
 <h4 align="middle">Explain why these results are observed.</h4>
 
-<p>We see these results (the triangles becoming "smoother") because increasing the sample rate means that we have more pieces of data to use in assembling our representation of our original image. When our sample rate is 1, that means that for each pixel, we're only taking in the data at one part of the original image, and using that data to dictate the color of the pixel. This effectively works as a binary of sorts, telling us if the pixel we're looking at is, for example, red or white in the case of the red triangle pictured in the first image. 
+	<p>We see these results (the triangles becoming "smoother") because increasing the sample rate means that we have more pieces of data to use in assembling our representation of our original image. When our sample rate is 1, that means that for each pixel, we're only taking in the data at one part of the original image, and using that data to dictate the color of the pixel. This effectively works as a binary of sorts, telling us if the pixel we're looking at is, for example, red or white in the case of the red triangle pictured in the first image. </p>
 
-However, if we increase our sample rate, we don't need to limit ourselves to just being red or white: instead, we can look at the average of all our values sampled (or supersampled if you will) to create the illusion of a smoother edge. Anti-aliasing effectively places semi-transparent, or "blended" pixels, along the border of an otherwise sharp edge to fool the eye into filling in the blanks more naturally. </p>
+	<p>However, if we increase our sample rate, we don't need to limit ourselves to just being red or white: instead, we can look at the average of all our values sampled (or supersampled if you will) to create the illusion of a smoother edge. Anti-aliasing effectively places semi-transparent, or "blended" pixels, along the border of an otherwise sharp edge to fool the eye into filling in the blanks more naturally. </p>
+
+
+<h3 align="middle">Part 3: Transforms</h3>
+<h4 align="middle">Create an updated version of svg/transforms/robot.svg with cubeman doing something more interesting, 
+  like waving or running. Feel free to change his colors or proportions to suit your creativity. 
+  Save your svg file as my_robot.svg in your docs/ directory and show a png screenshot of your rendered drawing in your write-up. 
+  Explain what you were trying to do with cubeman in words.</h4>
+
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="images/screenshot_2-6_20-8-26.png" align="middle" width="600px"/>
+        </td>
+      </tr>
+    </table>
+  </div>
+  
+  <p><a href="https://youtu.be/NUqPyj7L714?t=38">"Talk is cheap,"</a> so here is a picture explaining what I tried to do instead:</p>
+  <div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="images/ryu.png" align="middle" width="117px"/>
+        </td>
+      </tr>
+    </table>
+  </div>
+  
+  <p>I used Illustrator to pose the robot to my fancy, then copy/pasted those new values for the transforms of each of the shapes into the original robot svg file. I know one could go into the SVG file and hand-alter the values one-by-one as well, but that's not as fun. </p>
+
+  <p>(Cubeman's red is also based on the color of Ryu's headband: it's slightly different from the default.)</p>
+
+
+<h2 align="middle">Section II: Sampling</h2>
+
+<h3 align="middle">Part 4: Barycentric coordinates</h3>
+
+<h4 align="middle">Explain barycentric coordinates in your own words and use an image to aid you in your explanation. One idea is to use a svg file that plots a single triangle with one red, one green, and one blue vertex, which should produce a smoothly blended color triangle.</h4>
+
+
+
+<h4 align="middle">Show a png screenshot of svg/basic/test7.svg with default viewing parameters and sample rate 1. If you make any additional images with color gradients, include them.</h4>
+
+<div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="images/part4.png" align="middle" width="117px"/>
+        </td>
+      </tr>
+    </table>
+</div>
+
 
 <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
 
