@@ -87,38 +87,6 @@
         </tr>
       </table>
     </div>
-    
-<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
-
-<div align="middle">
-  <table style="width=100%">
-    <tr>
-      <td>
-        <img src="images/image1.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-      <td>
-        <img src="images/image2.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-    </tr>
-    <br>
-    <tr>
-      <td>
-        <img src="images/image3.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-    </tr>
-    <br>
-    <tr>
-      <td>
-        <img src="images/image4.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-    </tr>
-  </table>
-</div>
-
 
 <h3 align="middle">Part 2: Antialiasing triangles</h3>
 <h4 align="middle">Walk through your supersampling algorithm and data structures. Why is supersampling useful? What modifications did you make to the rasterization pipeline in the process? Explain how you used supersampling to antialias your triangles.</h4>
@@ -278,17 +246,55 @@
 
 <h4 align="middle">Comment on the relative differences. Discuss when there will be a large difference between the two methods and why.</h4>
 
-<p>In this image, we can see that the equator line is a lot smoother in the renders that use bilinear sampling versus nearest: in nearest, the line comes off as rather chunky, whereas bilinear smoothes it out. Additionally, the white latitudinal lines are rather jagged and sharp in the nearest render, whereas the bilinear's algorithm allows for those lines to look more curved, enhancing the beveled quality of the image.</p> 
+<p>In this image, we can see that the equator line is a lot smoother in the renders that use bilinear sampling versus nearest: in nearest, the line comes off as rather chunky, whereas bilinear smoothes it out. Additionally, the white latitudinal lines are rather jagged and sharp in the nearest render, whereas the bilinear algorithm allows for those lines to look more curved, enhancing the beveled quality of the image. Finally, we also see less noise in the bilinear image: our oceans are blue, and not littered with specks of off-colored flecks resulting from nearest sampling.</p> 
 
 
 <h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
 
+<h4 align="middle">Explain level sampling in your own words and describe how you implemented it for texture mapping.</h4>
+
+<h4 align="middle">You can now adjust your sampling technique by selecting pixel sampling, level sampling, or the number of samples per pixel. Describe the tradeoffs between speed, memory usage, and antialiasing power between the three various techniques. </h4>
+
+<h4 align="middle">Using a png file you find yourself, show us four versions of the image, using the combinations of L_ZERO and P_NEAREST, L_ZERO and P_LINEAR, L_NEAREST and P_NEAREST, as well as L_NEAREST and P_LINEAR.</h4>
 
 
 <h2 align="middle">Section III: Art Competition</h2>
 <p>If you are not participating in the optional art competition, don't worry about this section!</p>
 
 <h3 align="middle">Part 7: Draw something interesting!</h3>
+
+<h2 align="middle">Delete later: template for pictures</h2>
+
+<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/image1.png" align="middle" width="400px"/>
+        <figcaption align="middle">Caption goes here.</figcaption>
+      </td>
+      <td>
+        <img src="images/image2.png" align="middle" width="400px"/>
+        <figcaption align="middle">Caption goes here.</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="images/image3.png" align="middle" width="400px"/>
+        <figcaption align="middle">Caption goes here.</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="images/image4.png" align="middle" width="400px"/>
+        <figcaption align="middle">Caption goes here.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
 
 </body>
 </html>
