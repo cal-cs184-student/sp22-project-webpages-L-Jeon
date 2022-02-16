@@ -156,11 +156,43 @@
 <h2 align="middle">Section II: Sampling</h2>
 
 <h3 align="middle">Part 4: Barycentric coordinates</h3>
-<h4 align="middle"></h4>
-	<p>For my implementation of supersampling I decided to increase my sample buffer in set_sample_rate, artificially increasing my resolution, then in my rasterize triangle I decided to multiple every x and y by the square root of sample rate and set up my box by picking my min and max, x and y, from these altered points and looping through my box as normal. (One key change I did was change the fill_pixel function to have y also be multiplied by the square root of sample rate since there are now more x’s in a row.)
+<h4 align="middle">Walk through your supersampling algorithm and data structures. Why is supersampling useful? What modifications did you make to the rasterization pipeline in the process? Explain how you used supersampling to antialias your triangles.</h4>
+
+	<p>For my implementation of supersampling, I decided to increase my sample buffer in set_sample_rate, artificially increasing my resolution. Then, in my rasterize_triangle I multiiplied every x and y by the square root of the sample rate and set up my box by picking the min and max x and y from these altered points and looping through my box as normal. (One key change I did was change the fill_pixel function to have y also be multiplied by the square root of sample rate since there are now more x’s in a row.)
 
 	The next thing I did was average the color values in resolve_to_framebuffer. Inside of the already existing double for loop, I put another nested double for loop with sx and sy for sample x and sample y which limits itself to being less than the square root of sample rate. I then go into the sample buffer, manually multiplying y by the square root of the sample rate, then adding sy, and following the rest of what we do in fill_pixel except for adding sx to the end and multiplying x by square root of sample rate. Finally I divided the end color pulled by sample rate to get the color I would use in frame_buffer. </p>
 
+<h4 align="middle">Show png screenshots of basic/test4.svg with the default viewing parameters and sample rates 1, 4, and 16 to compare them side-by-side. Position the pixel inspector over an area that showcases the effect dramatically; for example, a very skinny triangle corner.</h4>
+	
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/part2-1.png" align="middle" width="800px"/>
+        <figcaption align="middle">Default viewing parameters.</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="images/part2-2.png" align="middle" width="800px"/>
+        <figcaption align="middle">Sample rate = 4.</figcaption>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img src="images/part2-3.png" align="middle" width="800px"/>
+        <figcaption align="middle">Sample rate = 16.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+
+<h4 align="middle">Explain why these results are observed.</h4>
+
+<p>We see these results (the triangles becoming "smoother") because increasing the sample rate means that we have more pieces of data to use in assembling our representation of our original image. When our sample rate is 1, that means that for each pixel, we're only taking in the data at one part of the original image, and using that data to dictate the color of the pixel. This effectively works as a binary of sorts, telling us if the pixel we're looking at is, for example, red or white in the case of the red triangle pictured in the first image. 
+
+However, if we increase our sample rate, we don't need to limit ourselves to just being red or white: instead, we can look at the average of all our values sampled (or supersampled if you will) to create the illusion of a smoother edge. Anti-aliasing effectively places semi-transparent, or "blended" pixels, along the border of an otherwise sharp edge to fool the eye into filling in the blanks more naturally. </p>
 
 <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
 
