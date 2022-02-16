@@ -156,6 +156,10 @@
 <h2 align="middle">Section II: Sampling</h2>
 
 <h3 align="middle">Part 4: Barycentric coordinates</h3>
+<h4 align="middle"></h4>
+	<p>For my implementation of supersampling I decided to increase my sample buffer in set_sample_rate, artificially increasing my resolution, then in my rasterize triangle I decided to multiple every x and y by the square root of sample rate and set up my box by picking my min and max, x and y, from these altered points and looping through my box as normal. (One key change I did was change the fill_pixel function to have y also be multiplied by the square root of sample rate since there are now more x’s in a row.)
+
+	The next thing I did was average the color values in resolve_to_framebuffer. Inside of the already existing double for loop, I put another nested double for loop with sx and sy for sample x and sample y which limits itself to being less than the square root of sample rate. I then go into the sample buffer, manually multiplying y by the square root of the sample rate, then adding sy, and following the rest of what we do in fill_pixel except for adding sx to the end and multiplying x by square root of sample rate. Finally I divided the end color pulled by sample rate to get the color I would use in frame_buffer. </p>
 
 
 <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
