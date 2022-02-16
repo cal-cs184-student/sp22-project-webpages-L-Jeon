@@ -200,6 +200,26 @@
 
 <h4 align="middle">Explain barycentric coordinates in your own words and use an image to aid you in your explanation. One idea is to use a svg file that plots a single triangle with one red, one green, and one blue vertex, which should produce a smoothly blended color triangle.</h4>
 
+<p> While I don't have an svg file with a single triangle to show (strapped for time, haha), I did find a picture online. </p>
+
+<div align="middle">
+    <table style="width=100%">
+      <tr>
+        <td>
+          <img src="https://codeplea.com/public/content/tri-int-bary.png" align="middle" width="277px"/>
+          <figcaption align="middle"><a href="https://codeplea.com/triangular-interpolation">"Source"</a></figcaption>
+        </td>
+      </tr>
+    </table>
+</div>
+
+<p>(Trust me, we implemented barycentric coordinates properly. Check the next image.)</p>
+
+<p>Barycentric coordinates are a way of reckoning space by using the three points of a triangle. By recording your position from the three points as a percentage or fraction of how close you are to said points, all the points within a triangle can be accounted for as functions of the three points.</p>
+
+<p>In other words, if you look at the image above, the closer you are to the green vertex, V2, the greener you are, the closer you are to the red vertex the redder you are, and so on. By reckoning space in this manner, we're able to calculate a smooth gradient of color as seen above: the reason we get a gradient is because we can alter the color values at each position as being equal to their percent distance to each of the vertex. A point that's got a value of 100% on V2, for instance, will have 0% V1 and 0% V2, making it take on 100% of V2's color. Another example is to take a point near the middle of the triangle: say this point is 33% of the way to V2, 33% of the way to V1, and 34% of the way to V3. This point will then take on a color value that is 33% of V1's color, 33% of V2's color, and 34% of V3's, resulting in the brownish hue we get in the middle of the triangle.</p>
+
+<p>Barycentric coordinates can be calculated by creating normals that pass through each of the vertices, like miniature axes (plural of axis). For instance, in the above picture, a point that lies on the line between V1 and V3 would have a V2 value of 0%, and the closer one travels to V2, the higher the V2 value gets. This scaling allows us to have nicely colored triangles, regardless of the triangle's shape.</p>
 
 
 <h4 align="middle">Show a png screenshot of svg/basic/test7.svg with default viewing parameters and sample rate 1. If you make any additional images with color gradients, include them.</h4>
@@ -208,7 +228,7 @@
     <table style="width=100%">
       <tr>
         <td>
-          <img src="images/part4.png" align="middle" width="117px"/>
+          <img src="images/part4.png" align="middle" width="800px"/>
         </td>
       </tr>
     </table>
@@ -216,6 +236,49 @@
 
 
 <h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
+
+<h4 align="middle">Explain pixel sampling in your own words and describe how you implemented it to perform texture mapping. Briefly discuss the two different pixel sampling methods, nearest and bilinear.</h4>
+
+<p>Here, pixel sampling was us taking values from a texture and applying them to digital space (in the form of a triangle). We operated between two planes, the digital one and the texture one, and to figure out what color each pixel should be, we'd look at the corresponding values stored in our texture. In both cases, we implemented clamps to ensure that the texels we were sampling were in bounds.</p>
+
+<p>I feel pixel sampling has already been described in the supersampling section, so I'll talk about the changes between that scenario and this one. Because we're working with texture maps, instead of having some solid color that we paint into our pixels and have to blend with supersamples, we instead determine our pixels' colors via the texture map, and have to blend our pixels according to the pixels on that texture map. How we blend or color these pixels depends on our sampling method.</p>
+
+<p>Nearest sampling is exactly what it sounds like: given a point (u,v), we'd find the pixel location that is is closest to it, consult what that value is on our texture, and then return that value. Nearest sampling commonly produces a sharp edge for this reason, and is very common for upscaling pixel art.</p>
+
+<p>Bilinear sampling, on the other hand, is a bit more complicated. Given a point (u,v), to try and make a "smoother" image, we do something similar to the interpolation performed in the previous part. We'd first find four pixels that encompassed (u,v) best in a box-like formation. Then, by calculating how close (u,v) was to the edges of the four pixels we'd chosen, we could weigh the values of each of these four points by lerping them, first horizontally, then vertically. By doing this, we'd be able to render our image a bit more smoothly (less jaggies) by creating transitional effects between what would otherwise be sharp edges. Bilinear's smoothness generally makes it better than nearest for photo-realistic images, though it can cause images to get blurry at the cost of reducing jaggies.</p>
+
+<h4 align="middle">Check out the svg files in the svg/texmap/ directory. Use the pixel inspector to find a good example of where bilinear sampling clearly defeats nearest sampling. Show and compare four png screenshots using nearest sampling at 1 sample per pixel, nearest sampling at 16 samples per pixel, bilinear sampling at 1 sample per pixel, and bilinear sampling at 16 samples per pixel. </h4>
+
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/part5-1.png" align="middle" width="400px"/>
+        <figcaption align="middle">Nearest, 1 sample per pixel.</figcaption>
+      </td>
+      <td>
+        <img src="images/part5-2.png" align="middle" width="400px"/>
+        <figcaption align="middle">Nearest, 16 samples per pixel.</figcaption>
+      </td>
+    </tr>
+    <br>
+    <tr>
+      <td>
+        <img src="images/part5-3.png" align="middle" width="400px"/>
+        <figcaption align="middle">Bilinear, 1 sample per pixel.</figcaption>
+      </td>
+      <td>
+        <img src="images/part5-4.png" align="middle" width="400px"/>
+        <figcaption align="middle">Bilinear, 16 samples per pixel.</figcaption>
+      </td>
+    </tr>
+  </table>
+</div>
+
+
+<h4 align="middle">Comment on the relative differences. Discuss when there will be a large difference between the two methods and why.</h4>
+
+<p>In this image, we can see that the equator line is a lot smoother in the renders that use bilinear sampling versus nearest: in nearest, the line comes off as rather chunky, whereas bilinear smoothes it out. Additionally, the white latitudinal lines are rather jagged and sharp in the nearest render, whereas the bilinear's algorithm allows for those lines to look more curved, enhancing the beveled quality of the image.</p> 
 
 
 <h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
