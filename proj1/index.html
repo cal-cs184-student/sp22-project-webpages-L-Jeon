@@ -175,7 +175,7 @@
       <tr>
         <td>
           <img src="https://codeplea.com/public/content/tri-int-bary.png" align="middle" width="277px"/>
-          <figcaption align="middle"><a href="https://codeplea.com/triangular-interpolation">"Source"</a></figcaption>
+          <figcaption align="middle"><a href="https://codeplea.com/triangular-interpolation">Source</a></figcaption>
         </td>
       </tr>
     </table>
@@ -211,7 +211,7 @@
 
 <p>I feel pixel sampling has already been described in the supersampling section, so I'll talk about the changes between that scenario and this one. Because we're working with texture maps, instead of having some solid color that we paint into our pixels and have to blend with supersamples, we instead determine our pixels' colors via the texture map, and have to blend our pixels according to the pixels on that texture map. How we blend or color these pixels depends on our sampling method.</p>
 
-<p>Nearest sampling is exactly what it sounds like: given a point (u,v), we'd find the pixel location that is is closest to it, consult what that value is on our texture, and then return that value. Nearest sampling commonly produces a sharp edge for this reason, and is very common for upscaling pixel art.</p>
+<p>Nearest sampling is exactly what it sounds like: given a point (u,v), we'd find the pixel location that is is closest to it, consult what that value is on our texture, and then return that value. Nearest sampling is infamous for producing sharp edges for this reason, and is very common for upscaling pixel art.</p>
 
 <p>Bilinear sampling, on the other hand, is a bit more complicated. Given a point (u,v), to try and make a "smoother" image, we do something similar to the interpolation performed in the previous part. We'd first find four pixels that encompassed (u,v) best in a box-like formation. Then, by calculating how close (u,v) was to the edges of the four pixels we'd chosen, we could weigh the values of each of these four points by lerping them, first horizontally, then vertically. By doing this, we'd be able to render our image a bit more smoothly (less jaggies) by creating transitional effects between what would otherwise be sharp edges. Bilinear's smoothness generally makes it better than nearest for photo-realistic images, though it can cause images to get blurry at the cost of reducing jaggies.</p>
 
@@ -253,48 +253,76 @@
 
 <h4 align="middle">Explain level sampling in your own words and describe how you implemented it for texture mapping.</h4>
 
+<p>Level sampling is where we sample from different mipmap levels and use the data from these samples to calculate the values of our pixels' colors.</p>
+
+<p>For texture mapping, on the backend, we're drawing from mipmaps that have been formed to represent our target texture at various resolutions. I'll use this picture from Wikipedia to try and explain: </p>
+
+<img src="https://upload.wikimedia.org/wikipedia/commons/5/5c/MipMap_Example_STS101.jpg" align="middle" width="800px"/>
+<figcaption align="middle">Source: <a href="https://en.wikipedia.org/wiki/Mipmap">https://en.wikipedia.org/wiki/Mipmap</a></figcaption>
+
+<p>The power of mipmapping is contained in the format you see above: while under ideal circumstances, we can always view a picture at its full resolution, in reality this is not often the case, as images can be upscaled and downscaled for myriad reasons. Mipmaps store the data of how the image should look at smaller resolutions, specifically taking the original image and creating copies that are 1/4 the size of the resolution of the image on the layer "above" them. This storage allows for clearer images at various resolutions because of having more data to work with and because the downscaled images in the mipmap texture have (hopefully) already been antialiased (so we get less noise when we use them).</p>
+
+<p>In our implementation, for trilinear interpolation we calculated the mipmap level that best fit our needs via the formula covered in lecture, along with the guidance on the specs to properly calculate and resize the elements of the SampleParams struct. (These calculations were done in the rasterize_textured_triangle method in rasterizer.cpp, and were then handed over to the sample method attached to the texture passed into rasterize_textured_triangle.) </p>
+
+<p>After finding this level, which would be a float containing a (unlikely to be) integer value, we found the levels closest to this output by running floor() and ceil() on it, clamping these values to [0, the size of the mipmap]. We then took bilinear samples of our texture at each of these levels. </p>
+
+<p>Finally, we calculated how much to weigh these bilinear samples by seeing how close our float, non-integer mipmap level was to the two integers closest to it (for example, a mipmap level of 1.4 would weigh level 1 by 0.4x and level 2 by 0.6). We then returned our two weighted samples. </p>
+
+<p>For linear level sampling with nearest, we simply found the nearest level and used that to render our image. </p>
+
 <h4 align="middle">You can now adjust your sampling technique by selecting pixel sampling, level sampling, or the number of samples per pixel. Describe the tradeoffs between speed, memory usage, and antialiasing power between the three various techniques. </h4>
+
+<p>Note: As seen in this project, it's not like these methods are independent of each other: they usually act in harmony with one another. I probably don't need to say this, but since this is a pro/con list, it might make it seem this way.</p>
+
+<p>Pixel sampling: </p>
+<p>Pros: Real fast. Very little memory useage compared to the others. Also, there's not a ton of math compared to the other steps.</p>
+<p>Cons: Antialiasing? Haha. Oh please. Since we sample pixels, without considering their neighbors, there's virtually none here. </p>
+
+<p></p>
+
+<p>Level sampling:</p>
+<p>Pros: When done right, we get some great looking images, and at various resolutions. Looks nice. (Antialiasing power is high.)</p>
+<p>Cons: Mipmaps are larger than just using a normal, non-mipmapped texture, since they need to store more data. More calculations also need to be performed (though, for computers, this isn't terrible), and for trilinear, we effectively need double the samples to render each pixel (since we are using the data stored on two seperate layers). Trilinear antialiasing can also look TOO smooth… but hey, when it works, it looks very nice.</p>
+
+<p></p>
+
+<p>Supersampling:</p>
+<p>Pros: You can also get some very smooth images with this. It gives our algorithms more data to work with, which will (generally) lead to more accurate-looking renders (if the reference texture is high-res enough).</p>
+<p>Cons: If you go crazy with supersamples, you'll be perfoming a LOT more calculations. Increasing supersampling means you're increasing the calculations per pixel by that much, which can get… maybe less good if you're looking for speed (ex. video games can get texture "pop-in" as the console/computer chugs to sample all the points on the texture).</p>
 
 <h4 align="middle">Using a png file you find yourself, show us four versions of the image, using the combinations of L_ZERO and P_NEAREST, L_ZERO and P_LINEAR, L_NEAREST and P_NEAREST, as well as L_NEAREST and P_LINEAR.</h4>
 
-
-<h2 align="middle">Section III: Art Competition</h2>
-<p>If you are not participating in the optional art competition, don't worry about this section!</p>
-
-<h3 align="middle">Part 7: Draw something interesting!</h3>
-
-<h2 align="middle">Delete later: template for pictures</h2>
-
-<p>Here is an example 2x2 gridlike structure using an HTML table. Each <b>tr</b> is a row and each <b>td</b> is a column in that row. You might find this useful for framing and showing your result images in an organized fashion.</p>
+<p>Image is originally from <a href="https://en.wikipedia.org/wiki/%C5%8Ckami">Okami</a>, by the (now defunct) Clover Studio. I added some noise to it in Photoshop to try and make the nearest and linear images more visually distinct. </p>
 
 <div align="middle">
   <table style="width=100%">
     <tr>
       <td>
-        <img src="images/image1.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
+        <img src="images/part6-1.png" align="middle" width="400px"/>
+        <figcaption align="middle">L_ZERO and P_NEAREST.</figcaption>
       </td>
       <td>
-        <img src="images/image2.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
-      </td>
-    </tr>
-    <br>
-    <tr>
-      <td>
-        <img src="images/image3.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
+        <img src="images/part6-2.png" align="middle" width="400px"/>
+        <figcaption align="middle">L_ZERO and P_LINEAR.</figcaption>
       </td>
     </tr>
     <br>
     <tr>
       <td>
-        <img src="images/image4.png" align="middle" width="400px"/>
-        <figcaption align="middle">Caption goes here.</figcaption>
+        <img src="images/part6-3.png" align="middle" width="400px"/>
+        <figcaption align="middle">L_NEAREST and P_NEAREST.</figcaption>
+      </td>
+      <td>
+        <img src="images/part6-4.png" align="middle" width="400px"/>
+        <figcaption align="middle">L_NEAREST and P_LINEAR.</figcaption>
       </td>
     </tr>
   </table>
 </div>
+
+
+<h2 align="middle">Section III: Art Competition</h2>
+<p>We are not participating, but look forward to seeing the entries. :)</p>
 
 </body>
 </html>
