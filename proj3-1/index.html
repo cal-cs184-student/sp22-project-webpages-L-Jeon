@@ -1,7 +1,395 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 3-1 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<script async="" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML" type="text/javascript"></script>
+<style>  
+    div.padded {  
+      padding-top: 0px;  
+      padding-right: 100px;  
+      padding-bottom: 0.25in;  
+      padding-left: 100px;  
+    }  
+  </style> 
+<title>Project 3-1 Writeup  |  CS 184</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+<br />
+<h1 align="middle">Assignment 3: PathTracer</h1>
+    <h2 align="middle">Lena Jeon (cs184-acy), William Xie (cs184-aah)</h2>
+    <p align="middle">Site link: </p>
+
+    <div class="padded">
+        <h2 aign="middle">Project Overview</h2>
+        <p>In this project, we coded a ray tracer. First, we worked on generating rays, shooting them, and checking if they hit something via ray-triangle and ray-sphere intersection. We then worked on speeding up our ray collision checking via implementing a Bounding Volume Hierarchy, or a BVH. By conglomerating our primitives' bounding volumes into different sections of the scene, we drastically sped up rendering by not having to worry about checking for intersections with objects that aren't anywhere near a ray's path. After speeding up our ray tracing process, we then set about implementing checking bounces of light, first with zero and one bounce illumination from a single light source (direct), then multiple bounce illumination from light reflected off of various objects in the scene. Finally, we used adaptive sampling to intelligently ration out our samples to yield a smoother looking image.</p>
+
+    <h2 align="middle">Part 1: Ray Generation and Intersection</h2>
+
+        <h3>Walk through the ray generation and primitive intersection parts of the rendering pipeline.</h3>
+
+            <p><i>Ray generation:</i></p>
+
+            <p>In Task 1 of Part 1, we generated camera rays to shoot out into our scene. To aid in our explanation, I'll borrow the image from the spec:</p>
+            <img src="https://i.imgur.com/1RInV9l.png" width="823px" />
+            
+
+            <p>To convert our camera ray from image space into sensor space, we did some simple conversions. First, since the sensor is centered at \((0, 0, -1)\) in 3D space versus the image space's \((0.5, 0.5)\) center coordinates, we have to adjust for this by subtracting both our \(x\) and \(y\) by \(0.5\). Next, by using the location of the virtual camera sensor's bottom left and top right corners, we "stretched" the image space to match that of the sensor space, whose dimensions are \(tan(.5 * hFov) * 2\) by \(tan(.5 * vFov) * 2\). In other words, we multiplied the image space's now-adjusted \(x\) and \(y\) coordinates by the width and height of the sensor's dimensions.</p>
+
+            <p>The next step was to convert this point on our sensor into a ray shooting out of our camera. We did this by setting the ray's origin to the position of our camera, provided in pos, and a direction. We calculated this direction to be the camera-to-world matrix provided in <code>c2w</code> times the point in sensor space (that we calculated above with a \(z\) value of \(-1\)) to get the point's position in the world space. This resulting value from the <code>c2w</code> multiplication was then normalized as per the specifications given on the spec. Finally, we set our new ray's <code>min_t</code> and <code>max_t</code> values to <code>near_clip()</code> and <code>far_clip()</code> respectively and returned that ray.</p>
+
+            <br>
+
+            <p><i>Primitive intersection parts of the rendering pipeline:</i></p>
+            
+            <p>The primitive intersection parts of ray-triangle intersection and ray-sphere intersection simply check for if the passed-in ray intersects with the given primitive or not. In the case of the triangle, we first check if the ray hit the plane that the primitive is on, then check if the point on that plane that the ray hit is part of our primitive. For spheres, we solve the sphere equation, \((p - c)^2 - R^2 = 0\) where \(p = o + td\) from our ray equation to get a point of intersection (or two, in the event the ray pierces the sphere: in this case when we are returning a point, we return the point closer to the ray's origin).</p> 
+
+                <p> ---- </p>
+                <h3>Explain the triangle intersection algorithm you implemented in your own words.</h3>
+
+                <p>To perform this check for <code>Triangle::has_intersection</code>, we performed <a href="https://cs184.eecs.berkeley.edu/public/sp22/lectures/lec-9-ray-tracing/slides/slide-22.jpg">the Möller Trumbore algorithm as noted in lecture</a>. The gory details can be seen in our code and on that slide (or <a href="https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm">Wikipedia</a>), but we basically calculated all the requisite values to obtain the <code>Vector3D</code> containing <code>[t, b1, b2]</code>. If our <code>t</code> value lay in the range of <code>[r.min_t, r.max_t]</code>, then we would know that the ray hit the plane our primitive was on. To know if it hit our triangle, we checked to see if <code>b1</code>, <code>b2</code>, <code>b3</code> values were between \(0\) and \(1\) (<code>b1, b2, b3</code> are Barycentric coordinates, which we used in the previous project: if any of the values were not in this range, then we know that the point is not in the triangle).</p>
+
+                <p> ---- </p>
+
+            <p>For <code>Sphere::has_intersection</code>, we ran a simpler test that was illustrated on <a href="https://cs184.eecs.berkeley.edu/public/sp22/lectures/lec-9-ray-tracing/slides/slide-23.jpg">this lecture slide from Lecture 9</a> to check if our ray hit our sphere. </p>
+
+        <h3>Show images with normal shading for a few small <code>.dae</code> files.</h3>
+
+
+        <img src="images/part1-0.png" width="480px" />
+        <img src="images/part1-1.png" width="480px" />
+        <img src="images/part1-2.png" width="480px" />
+        <img src="images/part1-3.png" width="480px" />
+
+
+    <h2 align="middle">Part 2: Bounding Volume Hierarchy</h2>
+
+        <h3>Walk through your BVH construction algorithm. Explain the heuristic you chose for picking the splitting point.</h3>
+
+        <p><i>(High-level overview of what we're doing here: A BVH is effectively a series of bounding boxes in bounding boxes. We categorize primitives in this manner so that we don't need to check all primitives in a scene when performing ray tracing: instead, if we hit a bounding box, we just need to check if our ray hits the bounding boxes in this bounding box, and if so, which ones, continuing until we hit a bounding box with no more bounding boxes inside of it (a leaf node).)</i></p>
+
+        <p>Our BVH construction algorithm first constructs a bounding box with primitives inside from the passed in Primitive vectors <code>start</code> and <code>end</code>. If the number of primitives is less than or equal to the passed-in <code>max_leaf_size</code>, we simply return the current node. Else, we set about splitting the box.</p>
+
+        <p>In our final implementation, we first found the average position of the centroids in our bounding box. While we were calculating this value, we figured out the coordinates of the centroids that were at the two extremes of the bounding box, storing them in a <code>minPoint</code> and <code>maxPoint</code> respectively. Taking our average centroid value, we then chose to split the box at the axis that had the greatest difference. We then compare the centroid values of all the primitives in the bounding box, sorting them into the left and right depending on if the centroid's axis value is less than or greater than or equal to the chosen axis of our average split point. For example, if we chose to split on the X axis, we'd compare the centroids' x values to our average centroid split point's x value to sort them into left and right groups. Finally, in the case where all the primitives are pushed to one side, we force the primitives to equally split into two sets regardless of their actual positions. This might not create an optimal BVH node, but averts a scenario we ran into where we entered an infinite loop (due to one side not having anything in it).</p>
+
+        <h3>Show images with normal shading for a few large .dae files that you can only render with BVH acceleration.</h3>
+
+        <div align="middle">
+          <table style="width=100%">
+            <tr>
+              <td>
+                <img src="images/part2-0.png" align="middle" width=480/>
+              </td>
+              <td>
+                <img src="images/part2-1.png" align="middle" width=480/>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <h3>Compare rendering times on a few scenes with moderately complex geometries with and without BVH acceleration. Present your results in a one-paragraph analysis.</h3>
+
+        <table>
+          <tr>
+            <th>File</th>
+            <th>Render time (Before BVH)</th>
+            <th>Render time (After BVH)</th>
+            <th>Speedup (rounded to nearest tenth of a %)</th>
+          </tr>
+          <tr>
+            <td>beast.dae</td>
+            <td>145.1387s</td>
+            <td>0.0427s</td>
+            <td>339903.3%</td>
+          </tr>
+          <tr>
+            <td>maxplanck.dae</td>
+            <td>105.7981s</td>
+            <td>0.00556s</td>
+            <td>1902843.5%</td>
+          </tr>
+          <tr>
+            <td>peter.dae</td>
+            <td>86.4121s</td>
+            <td>0.04321s</td>
+            <td>199981.7%</td>
+          </tr>
+        </table>
+
+
+        <p>We obtained a massive speedup from implementing BVH. BVH is powerful, and its primary strength lies in the fact that performing coarse ray-AABB intersection tests is much cheaper than performing the high-precision ray-triangle and/or ray-sphere intersection tests. A good BVH also allows us to quickly eliminate a large number of primitives from being considered as potential targets our ray may intersect with. Since each BVH node will ideally hold a good chunk of the primitives in the scene, if our ray intersects with one, that means it won't intersect with the other and we can effectively dump all the primitives in the other box(es) from our calculation.</p>
+
+        <h3><em>Extra: Bugs in our BVH</em></h3>
+
+        <p><em>Not part of the writeup's rubric, but something we thought might be interesting to share.</em></p>
+
+        <p> Initially, compared to the implementation tested in the spec, we weren't able to accomplish a very large speedup despite seemingly having implemented BVH sampling. To attempt to speed things up, we revisited our heuristic, which initially split the bounding box in the center across the axis that had the greatest difference in primitive locations, and replaced it with one that added up all the centroids in the bounding box, averaged their positions, and split the bounding box at the average centroid location across the axis with the largest difference in the primitives' positions. However, this didn't seem to speed things up either… until we realized that we had neglected to remove the loop in the source code for <code>has_intersection</code> that was iterating through <i>every single primitive in the scene each time it was called</i> (rather than just the primitives in the leaf node). After removing that and iterating through the <b>leaf</b> primitives only, our implementation saw the light (or millions of rays of light all at once, as it were) and the drastic speedup shown in the table above.</p>
+
+    <h2 align="middle">Part 3: Direct Illumination</h2>
+
+        <h3>Walk through both implementations (uniform hemisphere sampling and importance sampling lights) of the direct lighting function.</h3>
+
+        <p>In both of these scenarios, our goal is singluar: to try and emulate the brightness of an object properly. How we go about doing this, however, depends on the approach we decide to take.</p>
+
+        <p><i>Uniform hemisphere sampling (UHS):</i></p>
+
+        <p>For uniform hemisphere sampling, for each "thing" or bit of a mesh that we want to render on our computer screen, we need to figure out how bright, or how luminous, it should be. (If the surface doesn't need to be lit, we ignore it.) To do this, we perform random sampling in the direction of the hemisphere of that point based on its surface normal.</p>
+        <p>If our sample hits something, it'll return its emission, or radiance, that we can then use to compute how bright our location should be. In order to make sure this luminosity is a good approximation and not just any random sample, we take a lot of random samples and average them out to calculate the object's lighting at that point.</p>
+
+        <p>In the code, this looks like the following:</p>
+
+        <img src="https://cs184.eecs.berkeley.edu/public/sp22/lectures/lec-13-global-illumination-and-path-tra/slides/slide-25.jpg"/ width="800px">
+        <figcaption>(<a href="https://cs184.eecs.berkeley.edu/sp22/lecture/13-25/global-illumination-and-path-tra">Source</a>)</figcaption>
+
+        <p><code>L</code> is calculated as specified above: it's simply the radiance of our intersection point. <code>p.brdf(wi,wo)</code> is the material information of the current surface, i.e. the place where we shot our ray to find the direct lighting, so to sample the <code>brdf</code>, we can call <code>isect->bsdf->f(wo,wi)</code>. <code>costheta</code> is <code>costheta(wi)</code> (cosine of the sampled ray) via the Lambertian law of diffuse lighting: we're projecting light onto the surface normal to obtain a final intensity with any tilt/angles taken into account (the dot product of <code>wi</code> and <code>wo</code>). 
+        Finally, to top off our Monte Carlo estimator, we need to divide all of this by the <code>pdf</code>. Here, our <code>pdf</code> is <code>1/(2pi)</code> because we're performing <b>hemisphere</b> sampling.</p>
+
+        <p><i>Importance Sampling Lights:</i></p>
+
+        <p>In the case of importance sampling, while we do perform some random sampling in one scenario, we being by first figuring out if our light source directly hits <code>hit_p</code>, the hit point whose radiance we're calculating. If it does, then we know that this point will be directly lit and only need to sample it once (since we've found how bright it should be, and there's no point in continuing to obtain identical samples from the point light), and we can run Monte Carlo on this sample like we did in UHS, with a PDF value of <code>1.0</code>.</p>
+
+        <p>Otherwise, we use area lighting to figure out the point's radiance. In a similar manner to UHS, we still take in random samples and calculate the Monte Carlo estimator in the same manner as before, but the main difference is in our PDF. 
+
+            Here, instead of picking a random direction on the hemisphere and weighing it equally across the hemisphere, we use <code>SceneLight::sample_L</code> to obtain a direction <code>w_i</code> which is more likely to hit the light source, as well as the corresponding importance PDF to weigh the sample.
+
+            As this is area lighting, and not point lighting, we still need to take in a lot of samples and average them out (again, similar to UHS). However, since we try to properly weigh sample the directions that are more important given our prior knowledge of the scene (like the position and the size of the light source), our render ends up having less noise.</p>
+
+        <p>(As a final note, the reason why UHS ends up being noisy is due to its random sampling aspect. In theory, if we take enough samples, it will eventually converge to an image akin to the one rendered by importance sampling.)</p>
+
+
+        <h3>Show some images rendered with both implementations of the direct lighting function.</h3>
+
+        <div align="middle">
+          <table style="width=100%">
+            <tr>
+              <td>
+                <img src="images/part3-0-uhs.png" align="middle"/>
+                <figcaption>Uniform hemisphere sampling.</figcaption>
+              </td>
+              <td>
+                <img src="images/part3-1-is.png" align="middle"/>
+                <figcaption>Importance sampling.</figcaption>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <h3>Focus on one particular scene with at least one area light and compare the noise levels in soft shadows when rendering with 1, 4, 16, and 64 light rays (the <code>-l</code> flag) and with 1 sample per pixel (the <code>-s</code> flag) using light sampling, not uniform hemisphere sampling.</h3>
+
+        <p>The following were all rendered with 1 sample per pixel: </p>
+
+        <div align="middle">
+          <table style="width=100%">
+            <tr>
+              <td>
+                <img src="images/bunny-1.png" align="middle"/>
+                <figcaption align="middle">1 light ray</figcaption>
+              </td>
+              <td>
+                <img src="images/bunny-4.png" align="middle"/>
+                <figcaption align="middle">4 light rays</figcaption>
+              </td>
+            </tr>
+            <br>
+            <tr>
+              <td>
+                <img src="images/bunny-16.png" align="middle"/>
+                <figcaption align="middle">16 light rays</figcaption>
+              </td>
+              <td>
+                <img src="images/bunny-64.png" align="middle"/>
+                <figcaption align="middle">64 light rays</figcaption>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <h3>Compare the results between uniform hemisphere sampling and lighting sampling in a one-paragraph analysis.</h3>
+
+        <p>UHS has more noise than importance sampling, with the latter generating a generally smoother image. This is due to how UHS will weigh all pieces of data equally, while importance sampling weighs the data received from each sample according to how "important" the sample is expected to be in calculating the light in the scene. This importance depends on the direction that the light is coming from: light that comes directly from the light source is deemed more "important" than other directions. Since UHS doesn't discriminate among the samples received, and because Monte Carlo is an estimator (while a good approximation, it is not exact) that means that some less-important samples are altering our estimate more than they should, resulting in the speckled/noisy effect. (See the previous part for more details.)</p>
+
+    <h2 align="middle">Part 4: Global Illumination</h2>
+        <h3>Walk through your implementation of the indirect lighting function.</h3>
+
+        <p>For indirect lighting, we're now concerned with how light is bouncing off of other objects, rather than just worrying about the rays of light that come directly from our light source (zero bounce) or the ones that come from our light source, bounce once, and then hit our camera (one bounce). So, for each point that we want to render, we're generating their irradiance values after a certain number of bounces (similar to <a href="https://cs184.eecs.berkeley.edu/sp22/lecture/13-47/global-illumination-and-path-tra">this series of slides from lecture</a>). By summing up the data we get from each successive bounce to a point, we can get a pretty good estimate for how the scene would look like in real life, where myriad bounces of light illuminate the objects around us </p>
+
+        <p>First, given a hit point, we calculate the "direct lighting" of said point. Note that this value might be different from what we got in part 3, since we don't know how deep into our recursion we might be--while it <em>is</em> the direct lighting of the hit point, that doesn't necessarily mean it's the light from the first bounce due to our recursion. Then, we check to see if we've hit our depth limit, terminating if <code>r.depth <= 1</code>.</p> 
+
+        <p>If we haven't hit our depth limit, we load up Russian Roulette to see if we're going to continue onwards to the next bounce. The specs have suggested setting our <code>cpdf = 0.4</code>, so that's what we do, with one caveat: if we're at our first bounce (<code>r.depth == max_ray_depth</code>), we set <code>cpdf = 1.0</code> to guarantee that we'll always move on to the second bounce, or first indirect bounce.</p>
+
+        <p>After passing R.Roulette, we prepare for the next bounce, creating a new <code>Ray</code> with <code>depth = r.depth - 1</code> and shoot it out from our hit point to find an intersection. If there's no intersection, then there's no reason to trace the ray, so we exit. Else (there is an intersection), we recurse, calling <code>at_least_one_bounce_radiance</code> on our new ray. Our return value is processed in a similar manner to the previous part (Part 3: Direct Lighting), though we have an additional step where we divide our final lighting result by the <code>cpdf</code> of our R.Roulette to make sure our estimator is unbiased.</p> 
+
+        <p><em>(Extra: Why do our renders have so much noise?)</em></p>
+            <p> The images we render with the methods covered in this part have a good amount of noise to them. While they are good approximations to how the images would look like in a naturally-lit room in the real world, because of our RNG-style method of sampling, potentially lacking the necessary number of samples, or prematurely killing off rays in R.Roulette, we end up with situations where the summed data we get isn't 100% accurate. To fix the noise, we need to either perform importance sampling or increase our sample rate.</p>
+
+        <h3>Show some images rendered with global (direct and indirect) illumination. Use 1024 samples per pixel.</h3>
+
+        <div align="middle">
+          <table style="width=100%">
+            <tr>
+              <td>
+                <img src="images/part4-global1.png" align="middle"/>
+              </td>
+              <td>
+                <img src="images/part4-global2.png" align="middle"/>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+
+
+        <h3>Pick one scene and compare rendered views first with <em>only</em> direct illumination, then <em>only</em> indirect illumination. Use 1024 samples per pixel.</h3>
+
+        <div align="middle">
+          <table style="width=100%">
+            <tr>
+              <td>
+                <img src="images/part4-directonly.png" align="middle"/>
+                <figcaption align="middle">Only Direct illumination</figcaption>
+              </td>
+              <td>
+                <img src="images/part4-indirectonly.png" align="middle"/>
+                <figcaption align="middle">Only Indirect Illumination</figcaption>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <h3>For CBbunny.dae, compare rendered views with max_ray_depth set to 0, 1, 2, 3, and 100 (the <code>-m</code> flag). Use 1024 samples per pixel.</h3>
+
+        <div align="middle">
+          <table style="width=100%">
+            <tr>
+              <td>
+                <img src="images/part4-depth0.png" align="middle"/>
+                <figcaption align="middle"><code>max_ray_depth = 0</code></figcaption>
+              </td>
+            </tr>
+            <br>
+            <tr>
+              <td>
+                <img src="images/part4-depth1.png" align="middle"/>
+                <figcaption align="middle"><code>max_ray_depth = 1</code></figcaption>
+              </td>
+            </tr>
+            <br>
+            <tr>
+              <td>
+                <img src="images/part4-depth2.png" align="middle"/>
+                <figcaption align="middle"><code>max_ray_depth = 2</code></figcaption>
+              </td>
+            </tr>
+            <br>
+            <tr>
+              <td>
+                <img src="images/part4-depth3.png" align="middle"/>
+                <figcaption align="middle"><code>max_ray_depth = 3</code></figcaption>
+              </td>
+            </tr>
+            <br>
+            <tr>
+              <td>
+                <img src="images/part4-depth100.png" align="middle"/>
+                <figcaption align="middle"><code>max_ray_depth = 100</code></figcaption>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+        <h3>Pick one scene and compare rendered views with various sample-per-pixel rates, including at least 1, 2, 4, 8, 16, 64, and 1024. Use 4 light rays.</h3>
+
+        <p>All rendered with <code>-l 4</code>.</p>
+        <div align="middle">
+          <table style="width=100%">
+            <tr>
+              <td>
+                <img src="images/part4-spp1.png" align="middle"/>
+                <figcaption align="middle">sample-per-pixel = 1</figcaption>
+              </td>
+            </tr>
+            <br>
+            <tr>
+              <td>
+                <img src="images/part4-spp2.png" align="middle"/>
+                <figcaption align="middle">sample-per-pixel = 2</figcaption>
+              </td>
+            </tr>
+            <br>
+            <tr>
+              <td>
+                <img src="images/part4-spp4.png" align="middle"/>
+                <figcaption align="middle">sample-per-pixel = 4</figcaption>
+              </td>
+            </tr>
+            <br>
+            <tr>
+              <td>
+                <img src="images/part4-spp8.png" align="middle"/>
+                <figcaption align="middle">sample-per-pixel = 8</figcaption>
+              </td>
+            </tr>
+            <br>
+            <tr>
+              <td>
+                <img src="images/part4-spp16.png" align="middle"/>
+                <figcaption align="middle">sample-per-pixel = 16</figcaption>
+              </td>
+            </tr>
+            <br>
+            <tr>
+              <td>
+                <img src="images/part4-spp64.png" align="middle"/>
+                <figcaption align="middle">sample-per-pixel = 64</figcaption>
+              </td>
+            </tr>
+            <br>
+            <tr>
+              <td>
+                <img src="images/part4-spp1024.png" align="middle"/>
+                <figcaption align="middle">sample-per-pixel = 1024</figcaption>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+
+    <h2 align="middle">Part 5: Adaptive Sampling</h2>
+
+        <h3>Walk through your implementation of the adaptive sampling.</h3>
+
+        <p>Building off of part 4's global illumination, we now tackle the issue of the noise it had generated. In order to generate a more accurate and clearer image, we now concern ourselves with the variance of the values we get for each pixel on our screen. If the values we get are heavily varied, for example, it's fair to assume that we aren't very close to the "true" value we're looking for, so we'll continue taking samples until we're comfortable generating an accurate value with the total data we've generated for that pixel. By being able to concentrate our samples on these areas that need more care and quitting early when we encounter areas that converge early.</p>
+
+        <p>In our implementation, as we ray trace each pixel on our viewing window or screen, we stop calculating the value the pixel should be once our result's variance is less than or equal to <code>maxTolerance</code>. This is opposed to tracing all <code>num_samples</code> samples, which may not be necessary depending on the pixel in question.</p>
+
+        <p>As we trace each sample, we also keep track of the number of samples we've traced and the sum of the illuminance (<code>s1</code>) and the sum of the illuminance squared (<code>s2</code>) of the samples we've traced thus far. Once our <code>sample_count % samplesPerBatch == 0</code>, we compute the mean (<code>mu</code>), standard deviation/variance (<code>sigma</code>), and \(I\) value of all the samples we've accumulated. If <code>I <= maxTolerance * mu</code>, we say that the result converges and terminate.</p>
+
+        <p>Finally, so we can see the output sampling rate image, we update <code>sampleCountBuffer</code>.</p>
+
+        <h3>Pick one scene and render it with at least 2048 samples per pixel. Show a good sampling rate image with clearly visible differences in sampling rate over various regions and pixels. Include both your sample rate image, which shows your how your adaptive sampling changes depending on which part of the image you are rendering, and your noise-free rendered result. Use 1 sample per light and at least 5 for max ray depth.</h3>
+
+        <div align="middle">
+          <table style="width=100%">
+            <tr>
+              <td>
+                <img src="images/part5-0_rate.png" align="middle"/>
+                <figcaption align="middle">Sample image.</figcaption>
+              </td>
+              <td>
+                <img src="images/part5-0.png" align="middle"/>
+                <figcaption align="middle">Rendered result.</figcaption>
+              </td>
+            </tr>
+          </table>
+        </div>
+
+
+    <h2 align="middle">Partner Collaboration</h2>
+    <p>This project was largely carried by William, who had the best understanding of the project's contents, goals, and means of implementation. Lena handled the writeup, and learned quite a bit about the ray tracing process along the way.</p>
+</div>
+</body>
 </html>
+
+
+
+
