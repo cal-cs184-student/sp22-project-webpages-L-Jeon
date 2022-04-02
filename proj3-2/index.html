@@ -1,7 +1,195 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 3-2 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>  
+    div.padded {  
+      padding-top: 0px;  
+      padding-right: 100px;  
+      padding-bottom: 0.25in;  
+      padding-left: 100px;  
+    }  
+  </style> 
+<title>Project 3-2 Write-up  |  CS 184</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+<br />
+<h1 align="middle">Assignment 3: PathTracer (Part 2)</h1>
+    <h2 align="middle">Lena Jeon (cs184-acy), William Xie (cs184-aah)</h2>
+
+    <div class="padded">
+    	<h2 align="middle">Project Overview</h2>
+        <p>In this project, we chose to implement mirror and glass materials (Part 1) and microfacet materials (Part 2). Since the purpose of modeling objects in this project is to make them look realistic, it follows that we base our calculations on real-world ones to mimic real-world behaviors… so long as it makes sense to do so.</p> 
+    	<p>To implement mirror and glass materials, we had to calculate reflected light rays and refracted ones based (unsurprisingly) on how they work in the real world. For microfacet materials, we approximate the micro level material's surface property at a macro level using statistics, with a few reasonable assumption to reduce the complexity of computation.</p>
+    	<p>In implementing these various sections, we followed the instructions given in lecture and on the spec. As it's very math-intensive and we are not the ones deriving the formulae, a lot of this project consisted of crunching numbers and inputting them into said formulae. In doing this, we gained a great appreciation for the work that the mathematic and scientific community have done so we can render metal dragons and glass spheres in our tri-color, five-walled boxes.</p> 
+
+    	<p>(Surely, this is all as Newton and his predecessors intended their formulae to be used: to power our god complexes through great difficulty as we wonder why the eta term they've provided isn't working in our code before realizing we were calling the wrong variable, <code>n</code>, which is not <code>eta</code>, in its place this entire time. It would seem omnipotence is useless without the knowledge to wield it…)</p>
+
+    <h2 align="middle">Part 1: Mirror and Glass Materials</h2>
+
+    	<h3 align="middle">Implementation Overview</h3>
+    	<p>In order to render mirror and glass materials properly, our renderer needs to know how to calculate reflections and refractions. In <code>BSDF::reflect()</code> we take the input vector and reflect it about its normal, storing the reflected vector in <code>wo</code>. To calculate a light ray traveling through glass (refraction), we use Snell's Law and the Law of Refraction as covered in lecture to calculate <code>wo</code>.</p>
+
+    	<p>For mirrors, we call <code>BSDF::reflect()</code>, passing in <code>wo, wi</code> to obtain <code>wo</code>'s reflected ray in <code>wi</code>, set the <code>pdf</code> to 1 (as all the radiance reflects to one direction), and return <code>reflectance / abs_cos_theta(*wi)</code> (as specified in the project specifications). We do this to cancel out the cosine value that <code>at_least_one_bounce_radiance</code> will multiply <code>MirrorBSDF::sample_f()</code> by.</p>
+
+    	<p>In the case of rendering glass, we have two primary ray occurences to look out for: if the ray of light get reflected on the surface of the object it has hit or it refracts through said surface. The reflected scenario is straightforward: we just reflect the ray. Refraction, however, is more complex.</p> 
+
+    	<p>For refraction, we use Snell's Law to find the refraction angle of the ray given the index of refraction, which is changed based on if the ray is entering or leaving the surface. While considering this, we also have to keep in mind a special case where total internal reflection occurs under certain angles, in which case we discard the refraction operation altogether.</p>
+    	
+    	<p>Once we have our refraction function, we use Russian Roulette and <code>coin_flip(R)</code> to determine if the ray will be reflected or refracted. The probability, R, is based on the Fresnel equation, using Schlick's approximation. If our coin comes up heads (true) or total internal reflection occurs we reflect the ray and set the <code>pdf</code> to be R. We then return <code>R * reflectance / abs_cos_theta(*wi)</code>, dividing by <code>abs_cos_theta</code> for the same reason as in <code>mirrorBSDF::sample_f()</code>. Otherwise, we refract it, set the <code>pdf</code> to be <code>1 - R</code>, and return <code>(1-R) * transmittance / abs_cos_theta(*wi) / eta^2</code>.</p>
+
+    	<h3 align="middle">Show a sequence of six images of scene <code>CBspheres.dae</code> rendered with max_ray_depth set to 0, 1, 2, 3, 4, 5, and 100. The other settings should be at least 64 samples per pixel and 4 samples per light.</h3>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/part1-0.png" width="480px" />
+                    <figcaption align="middle"><code>max_ray_depth = 0</code></figcaption>
+                    <td align="middle">
+                    <img src="images/part1-1.png" width="480px" />
+                    <figcaption align="middle"><code>max_ray_depth = 1</code></figcaption>
+                </tr>
+                <tr>
+                    <td align="middle">
+                    <img src="images/part1-2.png" width="480px" />
+                    <figcaption align="middle"><code>max_ray_depth = 2</code></figcaption>
+                    <td align="middle">
+                    <img src="images/part1-3.png" width="480px" />
+                    <figcaption align="middle"><code>max_ray_depth = 3</code></figcaption>
+                </tr>
+                <tr>
+                    <td align="middle">
+                    <img src="images/part1-4.png" width="480px" />
+                    <figcaption align="middle"><code>max_ray_depth = 4</code></figcaption>
+                    <td align="middle">
+                    <img src="images/part1-5.png" width="480px" />
+                    <figcaption align="middle"><code>max_ray_depth = 5</code></figcaption>
+                </tr>
+                <tr>
+                    <td align="middle">
+                    <img src="images/part1-6.png" width="480px" />
+                    <figcaption align="middle"><code>max_ray_depth = 100</code></figcaption>
+                </tr>
+            </table>
+        </div>
+
+        <h3 align="middle">Point out the new multibounce effects that appear in each image. Explain how these bounce numbers relate to the particular effects that appear.</h3>
+        <li><em>Depth 0:</em> Should speak for itself, but this is 0 bounces, so we just get the light source. We shoot a ray from our viewpoint and since we have 0 bounces, we only record the light directly emitted from the light source.</li>
+        <br>
+        <li><em>Depth 1:</em> Direct lighting. We addressed this in the first part of the project (3-1). For the spheres, since the left sphere is purely reflective, we see a single band of light (the ceiling light being reflected into the viewpoint) while the right sphere's band is a bit noisy. The reason for this noise is because of Schlick's approximation dictating the random reflecting and refracting that the right sphere is performing. Since only some of the rays reflect and the others refract, the band of light we see on the right sphere is purely made up of those rays that do reflect. (Note: The refracted rays will need another bounce to leave the spheres after entering them.)</li>
+        <br>
+        <li><em>Depth 2:</em> We get a pretty clear reflection from our left reflective sphere: it's actually reflecting the scene from <code>max_ray_depth = 1</code>, the direct lighting scene, and will continue to "lag" one bounce behind as we look through the proceeding images, since what we see from the viewport is the information from the bounce prior. Our refractive sphere (right) is still pretty dark; although the refracted rays can now leave the sphere and hit the light source, said rays are more likely to hit the walls behind the sphere due to the position of the light source above. Therefore, the majority of the lighting present is still from direct reflection and one bounce indirect reflection.</li>
+        <br>
+        <li><em>Depth 3:</em> The left sphere's reflection of the surrounding scene is more accurate (again, note that it's the same as <code>max_ray_deph = 2</code> with how the ceiling is white and its neighboring sphere is still dark). The right sphere visible in the left sphere's reflection also has some indirect lighting (though this effect may be hard to see due to the size of the image: squint, and you can spot some red and white pixels reflected from the walls). The right sphere actually present in the scene's refracted light is now visible, as refracted rays can go from the viewport to the light source with 3 bounces now. The right sphere's reflected rays are most visible on its sides due to Fresnel's law. The ground under the right sphere is also bright now, as the rays that bounce to that part of the ground can enter the sphere and hit the light source with 3 bounces as well.</li>
+        <br>
+        <li><em>Depth 4:</em> In depth 4, the left sphere's reflection of its surroundings is more accurate, especially if we look at the reflection of the right sphere inside of it, which is now refracting light appropriately. We also start to see a patch of light on the right blue wall near the bottom right corner of the image, showing the light that's being refracted through our right sphere from the ceiling light, caustics on the left wall from the light being bounced from below the right sphere, and the bottom of the sphere picking up the light being bounced off of the floor. </li>
+        <br>
+        <li><em>Depth 5, Depth 100:</em> As our ray depth increases from here onwards, the scene appears more accurately lit due to the increased number of bounces that are being performed. The reflection of the right sphere in the left sphere also becomes less and less "laggy" as we increase the bounces of light, because past bounce 5 or so the difference in lighting between bounces rapidly decreases due to the diminishing power of the light rays being scattered about past their initial bounces. </li>
+
+
+    <h2 align="middle">Part 2: Microfacet Material</h2>
+
+    <h3 align="middle">Implementation Overview</h3>
+
+    <p>In this part, we implemented microfacets. Microfacet materials model surfaces with varying roughness values attached to them and how they respond to light. When light hits these types of materials, it tends to scatter in multiple directions due to small facets, or microfacets, on the surface of these materials that act as small mirrors that scatter light all about. Due to the high amount of computation that this could entail, we use statistics to approximate the results of this light scattering at a macro level.</p>
+
+    <p>To implement microfacets, we first wrote the BRDF based on the Cook-Torrance model. For this formula, we calculated (an approximation of) the Fresnel term, calculated the shadow-masking term, and then calculated the distribution of normals for our material and manipulated said terms <a href="https://cs184.eecs.berkeley.edu/sp22/lecture/14-20/material-modeling">as described in lecture</a>. Finally, we implemented importance sampling to yield a less noisy render using less samples for our microfacet material.</p>
+
+    <h3 align="middle">Show a sequence of 4 images of scene <code>CBdragon_microfacet_au.dae</code> rendered with α set to 0.005, 0.05, 0.25 and 0.5. The other settings should be at least 128 samples per pixel and 1 samples per light. The number of bounces should be at least 5. (Note that, to change the α, just open the .dae file and search for microfacet.)</h3>
+
+    <p>The following were rendered with 256 samples per pixel, 4 samples per light, and a max ray depth of 7.</p> 
+
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/CBdragon_microfacet_au_0-005.png" width="480px" />
+                    <figcaption align="middle"><code>α = 0.005</code></figcaption>
+                    <td align="middle">
+                    <img src="images/CBdragon_microfacet_au_0-05.png" width="480px" />
+                    <figcaption align="middle"><code>α = 0.05</code></figcaption>
+                </tr>
+                <tr>
+                    <td align="middle">
+                    <img src="images/CBdragon_microfacet_au_0-25.png" width="480px" />
+                    <figcaption align="middle"><code>α = 0.25</code></figcaption>
+                    <td align="middle">
+                    <img src="images/CBdragon_microfacet_au_0-5png.png" width="480px" />
+                    <figcaption align="middle"><code>α = 0.5</code></figcaption>
+                </tr>
+            </table>
+        </div>
+
+    <h3 align="middle">Describe the differences between the different images.</h3>
+
+    <p>Visually, we can see the dragon go from a more glossy look to a more matte finish as alpha increases. The dragon's surface looks rougher and rougher, the specular highlighting area becomes wider, and the visuals appear closer to the diffuse lighting. The reflections of the red, blue, and fourth wall (black, the void our camera/viewpoint is placed in) are especially prominent in the first two images and the fourth wall's darkness is nigh undetectible in the fourth image. This change from glossy to less glossy is expected considering α dictates how rough the macro surface of our object will be. In addition, when alpha is low, we see fireflies in the render. This is because the specular lighting is compressed at a small area instead of a spread-out one, resulting in a high amount of variance when picking bright bright rays.</p>
+
+
+    <h3 align="middle">Show two images of scene <code>CBbunny_microfacet_cu.dae</code> rendered using cosine hemisphere sampling (default) and your importance sampling. The sampling rate should be fixed at 64 samples per pixel and 1 sample per light. The number of bounces should be at least 5. Briefly discuss their difference.</h3>
+
+    <p>The following were rendered with 64 samples per pixel, 1 sample per light, and a max ray depth of 7.</p> 
+
+    	<div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/CBbunny_microfacet_cu_cos_hemisphere.png" width="480px" />
+                    <figcaption align="middle">Cosine hemisphere sampling</figcaption>
+                    <td align="middle">
+                    <img src="images/CBbunny_microfacet_cu_importance.png" width="480px" />
+                    <figcaption align="middle">(Our) Importance sampling</figcaption>
+                </tr>
+            </table>
+        </div>
+
+    <h3 align="middle">Breifly discuss the differences between the two images.</h3>
+
+    <p>The rabbit rendered by cosine hemisphere sampling is generally darker and noiser than its importance sampling sibling. Especially notable is the black, almost cartoonish outline around the rabbit. This is due to specular lirghting being more prominent at a smaller area when the material is glossy, which our rabbit is. In importance sampling, we sample the direction where the specular lighting is more likely to happen according to our BRDF, resulting in a render that looks more natural with less noise.</p>
+
+    <h3 align="middle">Show at least one image with some other conductor material, replacing <code>eta</code> and <code>k</code>. Note that you should look up values for real data rather than modifying them arbitrarily. Tell us what kind of material your parameters correspond to</h3>
+
+    <p>The following was rendered with 256 samples per pixel, 4 samples per light, and a max ray depth of 7. We used the following values for <code>eta</code> and <code>k</code> to create our nickel material: <code>eta = 0.056909 0.054007 0.046878</code>, <code>k = 4.2543 3.4290 2.8028</code>, <code>alpha = 0.2</code>.</p> 
+
+    	<div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="images/CBdragon_microfacet_ni_new.png" width="480px" />
+                    <figcaption align="middle">CBdragon made of nickel.</figcaption>
+                </tr>
+            </table>
+        </div>
+
+    <p>For references as to what nickel looks like (other than when it's used for the coin), for the potentially unaware reader: </p>
+
+    	<div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td align="middle">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/57/Nickel_chunk.jpg" width="480px" />
+                    <figcaption align="middle"><a href="https://en.wikipedia.org/wiki/Nickel#/media/File:Nickel_chunk.jpg">Nickel (Wikipedia)</a></figcaption>
+                </tr>
+                <tr>
+                	<td align="middle">
+                		<img src="https://cdn.shopify.com/s/files/1/1837/7823/products/JRA-12073_1500x.jpg?v=1603865949" width="480px"/>
+                		<figcaption align="middle">Black Panther sculpture made of nickel, found on Google Images. (<a href="https://www.graysonliving.com/products/john-richard-black-panther-sculpture-in-nickel-i">Available for purchase as well…</a>)</figcaption>
+                </tr>
+            </table>
+        </div>
+
+    
+
+
+<h2 align="middle">Partner Collaboration</h2>
+<p>Since the project with the staff solution wouldn't compile on Lena's M1 mac and the renders her computer yielded with her team's solutions from 3-1 were suspicious at best, all of the programming was done through William's computer which luckily ran everything fine. Thanks to CLion's collaboration feature, William wrote part 1 while Lena watched and commented, and Lena was able to write part 2 of this assignment on William's computer while William watched and commented through a janky pair programming setup that would freeze every two hours or so.</p> 
+
+<p>This writeup was written by Lena, who is making up for not sharing an equal burden on Project 3-1's workload, with content edits by William. Overall, collaboration went very smoothly and the project was completed very quickly (and accurately) before the beginning of spring break (though this writeup was completed much later).</p>
+
+</div>
+</body>
 </html>
+
+
+
+
