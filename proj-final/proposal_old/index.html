@@ -1,0 +1,139 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>  
+    div.padded {  
+      padding-top: 0px;  
+      padding-right: 100px;  
+      padding-bottom: 0.25in;  
+      padding-left: 100px;  
+    }  
+  </style> 
+<title>CS 184: Final Project Proposal</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+    <br />
+    <h1 align="middle">Final Project: Real-Time Ray Tracing</h1>
+    <h2 align="middle">Lena Jeon, Henry La, Kevin Ponce, Hamza Mohammad</h2>
+    <br /><br />
+
+          <div class="padded">
+
+              <h2 align="middle">Summary</h2>
+              <p>
+                  Our project will try to implement real-time ray tracing in the Unity engine to obtain a better understanding of how modern AAA games use it to render their graphics and scenes. If time permits, also look into implementing and understanding DLSS (Deep Learning Super Sampling) to further improve our basic real-time ray tracing engine.
+              </p>
+
+              <h2 align="middle">Problem Description</h2>
+              <p>
+                  Ray tracing is the process in which rays are cast from the camera’s lens to objects within a scene. From these intersections, we are then able to calculate the total illuminance of a particular point and convert this to the pixels we see on our screens. This process of tracing the path of our rays allows us to create realistic renderings of 3D virtual environments. However, the problem with normal ray tracing methods is that we are limited to images. What if we wanted to actually explore these virtual environments?
+                  <br /><br />
+                  Therein lies our proposal. In this project, we want to implement real-time ray tracing, which allows us to physically move within our virtual, ray-traced environments. To implement this, we will be using the game engine Unity. Because real-time ray tracing is very CPU intensive, we will be incorporating optimizations such as rasterization and bounding volume hierarchies in order to smooth our run times.
+              </p>
+
+
+              <h2 align="middle">Questions to be Answered in Analysis</h2>
+              <p>
+                  How do AAA games do real-time ray tracing without losing a ton of frames, when our ray tracer in project 3 takes, like, 30 seconds to render a single image?
+                  <br />
+                  What are the problems that people face in implementing real-time ray tracing into said games? (ex. Lag, frame drops, performance hits) And how do we solve these problems?
+                  <br />
+                  How do we account for the viewport moving?
+              </p>
+
+              <h2 align="middle">Planned Deliverables</h2>
+              <p>
+                  1. We will create an example scene using the 3D Free Modular Kit Asset library from Unity (see image below) and include additional assets in the scenes. The scenes will include multiple light sources of different colors and angles, and various reflective surfaces (variable reflectance and surface geometry), which demonstrate the effectiveness of ray-tracing when rendering the scene in terms of realism.
+                  <br /><br />
+                  2. From here we'll be building on the basic ray tracing script from project 3 series to get a foundation. We will determine success in this part by first seeing proper reflections with no missing lighting and, if possible, less noise than what we saw in the project 3 series. Then, we will see if we can get comparable or better speed when rendering a still scene. Finally, we will look into implementing GPU acceleration for rendering (possibly use RTX cores)
+                  <br /><br />
+                  3. Compare performance of basic ray tracing script with the existing Unity engine for ray-tracing. Evaluate based on render-time, detail, and noise to get real-time performance.
+                  <br /><br />
+                  4. Implement a function to get the rendering engine to work in real-time with movement in the scene so that it simulates what one might see as they move around in the scene, which may entail some optimization requirements (requires GPU acceleration).
+                  <br /><br />
+                  5. Once we get the real time tracing working we will try to optimize it once more to a point where it could be as suitable for gameplay as possible.  Possible methods:
+                  <br />
+                  a. Caching background scenes and its rendered paths to reduce render time
+                  <br />
+                  b. Some sort of super-sampling technique to render to lower-resolution and upscale in real-time
+                  <br />
+                  c. Implementing Voxel Cone Tracing (VXGI) in place of Path-Tracing for continuous rendering
+                  <br />
+                  d. DLSS(potentially)
+                  <br /><br />
+                  6.Compare performance of our real-time ray-tracing implementation with Unity’s real-time ray-tracing engine in terms of frames per second, and detail (occlusion, reflections, noise, etc.), and consistency of FPS. Possibly graph the FPS with the rendering detail (implement an existing industry-standard ray-tracing metric).
+              </p>
+
+              <div align="center">
+                  <table style="width=100%">
+                      <tr>
+                          <td align="middle">
+                              <img src="img/example.webp" width="480px" />
+                              <figcaption align="middle">Image of the assets included in the asset pack we'll be using</figcaption>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+
+              <h2 align="middle">Hoped Deliverables (Stretch Goals):</h2>
+              <p>
+                  1. Implement some form of DLSS (Deep Learning Super Sampling). Using deep learning to super-sample ray-traced scene in real-time to increase rendered FPS
+                  <br/>
+                  2. Implement an additional scene
+              </p>
+
+
+              <h2 align="middle">Schedule</h2>
+              <h3 align=" left">Goals for week 1 (4/13 - 4/20) </h3>
+              <p>
+                  Familiarity with Unity Engine, familiarity with how Unity Engine does ray tracing via documentation. Set up the scene to be rendered. Begin to port the ray tracing work we’ve done in Project 3 into Unity and begin converting it to something that can work in real-time (assuming real-time ray tracing can build on the basic ray-tracer we made in Project 3).
+                  <br /><br />
+                  (Additionally, create a simple script that allows us to move the camera around the level: we can’t really feel the impact of real-time ray tracing if our camera never moves.)
+              </p>
+
+              <h3 align=" left">Goals for week 2 (4/20 - 4/26) </h3>
+              <p>
+                  Prepare for milestone 1: complete implementation to the best of our ability before milestone 1, optimize FPS as best as we can, bugfix, etc. Complete recording footage for milestone 1 by 4/25 or the weekend before the milestone (4/23 - 4/24).
+                  <br /><br />
+                  If real-time ray tracing is somehow working bug-free and beautifully at this point, look into Unity’s DLSS package to further improve our performance. (See the Resources section for a link to the package.)
+              </p>
+
+              <h3 align=" left">Milestone 1 (short video demo, 2-3 slides, and 1 page summary of progress): 4/26 </h3>
+              <h3 align=" left">Goals for week 3 (4/26 - 5/3) </h3>
+              <p>
+                  Allocate time for optimizations and bug fixes. If there is time, do “something fun” with the real-time ray tracer we’ve created, or look into adding additional scenes.
+              </p>
+
+              <h3 align=" left">Final presentations: 5/3</h3>
+              <h3 align=" left">Final deliverables: 5/10</h3>
+
+
+              <h2 align="middle">Resources </h2>
+              <p>
+                  Unity Engine version 2021.2.19f1
+              </p>
+              <a href="https://assetstore.unity.com/packages/3d/environments/3d-free-modular-kit-85732"> Asset pack we’d use</a>
+              <br />
+              <a href="https://en.wikipedia.org/wiki/Deep_learning_super_sampling"> Deep Learning Super Sampling</a>
+              <br />
+              <a href="https://docs.unity3d.com/Packages/com.unity.render-pipelines.high-definition@12.0/manual/deep-learning-super-sampling-in-hdrp.html"> Unity Package for DLSS</a>
+              <br />
+              <h3 align=" left">Real-time ray-tracing techniques</h3>
+              <a href="https://research.nvidia.com/publication/2022-03_Research-Advances-Toward"> Research Advances Toward Real-Time Path Tracing</a>
+              <br/>
+              <a href="https://research.nvidia.com/publication/interactive-indirect-illumination-using-voxel-cone-tracing">Interactive Indirect Illumination Using Voxel Cone Tracing</a>
+              </br>
+              <a href="https://onlinelibrary.wiley.com/doi/abs/10.1111/j.1467-8659.2011.02063.x">Interactive Indirect Illumination Using Voxel Cone Tracing</a>
+
+
+             
+              </o>
+          </div>
+</body>
+</html>
+
+
+
+

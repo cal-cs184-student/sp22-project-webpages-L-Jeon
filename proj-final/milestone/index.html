@@ -1,0 +1,91 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>  
+    div.padded {  
+      padding-top: 0px;  
+      padding-right: 100px;  
+      padding-bottom: 0.25in;  
+      padding-left: 100px;  
+    }  
+  </style> 
+<title>CS 184: Final Project Milestone</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+    <br />
+    <h1 align="middle">Final Project: Cel Shading in Unity 3D</h1>
+    <h1 align="middle">Milestone 1</h1>
+    <h2 align="middle">Lena Jeon, Henry La, Kevin Ponce, Hamza Mohammad</h2>
+    <h3 align="middle"><a href="https://docs.google.com/presentation/d/1rYeHBkgh2KWrZLYDwyRjgscrdhmmGb8XGaC20sA3Glg/">Presentation slides can be found here (click me).</a></h2>
+
+          <div class="padded">
+
+              <h2 align="middle">What we started with</h2>
+              <p>
+                  Though some of us have used Unity's 2D engine before, working in 3D has proven to be a new and difficult experience. Luckily, the <a href="https://gamedesign.berkeley.edu/decal.php">Game Design and Development Decal at Berkeley</a> offers an in-depth tutorial on creating a basic 3D game (<a href="https://www.youtube.com/playlist?list=PLkTqf5DBzPsDQDTYorcX8RIcxzVC-sgO6">link to their video tutorial</a>, and <a href="https://github.com/berkeleyGamedev/3DTutorialBase">link to the project's github repo</a>), which we decided to use as our base project.
+              </p>
+
+              <p> 
+                Our base project started with a box environment with four light sources and a controllable player in the form of a red mannequin, which was already rigged and had running and attacking animations. The player moved using the WASD keyboard keys and the camera could be moved left and right with the mouse. Ghost-like enemies spawn and advance towards the player to deal contact damage, but can be eliminated by shooting lasers from the player's fists using the mouse's left and right click. These shots use a form of raycasting to determine if a ghost collides with the fired laser.
+              </p>
+
+              <h2 align="middle">What we have accomplished / Preliminary Results</h2>
+              <p>
+                First, we have implemented a cel shader by following a tutorial online (<a href=”https://www.patreon.com/posts/lit-toon-shader-54740865”>link</a>):
+              </p>
+
+              <div align="center">
+                  <table style="width=100%">
+                      <tr>
+                          <td align="middle">
+                              <img src="img/celshading_comparison.png" width="800px" />
+                              <figcaption align="middle"><em>Left: Original XBot, Right: XBot with cel shading</em></figcaption>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+
+              <p>The current cel shader supports rim lighting (the light-colored accents seen on the brighter edges of the model), achieved through Fresnel lighting. It also supports importing textures or using flat colors and the ability to modify the width and color of the cel shading ramp–where the shader calculates where to go from light to dark. We will be using this cel shader as a baseline to compare against other cel shading methods and parameters. We will also be exploring how these cel shaders look under different environments, of which we will build using assets found on the Unity Store.</p>
+
+              <div align="center">
+                  <table style="width=100%">
+                      <tr>
+                          <td align="middle">
+                              <img src="img/celshading_ex.png" width="400px" />
+                              <figcaption align="middle"><em>Cel shader with lighter-hued shadows for the red body, offering a more stylized look</em></figcaption>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+
+              <p>We have also begun building an environment for the player to explore, also using free assets from the Unity Store:</p>
+
+              <div align="center">
+                  <table style="width=100%">
+                      <tr>
+                          <td align="middle">
+                              <img src="img/environment.png" width="400px" />
+                              <figcaption align="middle"><em>Not using the cel shader yet, but soon!</em></figcaption>
+                          </td>
+                      </tr>
+                  </table>
+              </div>
+
+              <p>The base game that we're building off of had rather crusty camera controls and movement feel, which we have also improved in this time. For example, before, our camera script could only rotate about the y-axis (move left and right), and tended to clip behind walls, obstructing our player from view. We solved this by creating a script that 1. records and stores the player's mouse movement to rotate the camera in all directions and 2. prevents the camera from clipping into walls by using raycasting to make sure the player is always in view by turning off walls' visibility if necessary. </p>
+
+
+              <h3 align="middle">How it's going, and where it will go</h3>
+
+              <p>Progress has been smooth so far, but due to the exam last week (which we may have forgotten about when designing our initial schedule) we are a little bit behind. However, progress has been fast when the team is able to work, so hopefully things will continue to go smoothly. </p>
+
+              <p>We will continue to play around with different parameters for our cel shader and also look into different techniques that we can incorporate to get different objects to look good. We will also work on finishing the construction of our current environment, as well as adding on more playable content for our game.</p>
+
+          </div>
+</body>
+</html>
+
+
+
+
