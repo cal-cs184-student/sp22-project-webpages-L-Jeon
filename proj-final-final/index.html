@@ -22,7 +22,7 @@
 
     <div class="padded">
             
-            <h1 align=" middle"><a href=href"">Download and play our project here! (Itch.io)</a></h3>
+            <h1 align=" middle"><a href="https://zenuriken.itch.io/totally-not-doom">Download and play our project here! (Itch.io)</a></h1>
 
             <h2 align="middle">Abstract</h2>
             <p>
@@ -246,7 +246,7 @@
             <a href=”https://docs.unity3d.com/Packages/com.unity.shadergraph@6.9/manual/Fresnel-Effect-Node.html#:~:text =Description,normal%20and%20the%20view%20direction”>Source</a>
 
             <h4 align=" middle">Ambient Lighting and Global Illumination</h4>
-            <!-- Add to this before you finish dummy  from kevin to kevin-->
+
             <p>To go beyond just two-tone shading, or three-tone shading if rim-lighting is included, we would have to develop a complex shader pipeline that integrates multiple smoothstep functions and clipping or saturation functions to split the dual tone shading into additional gradients. This approach is complex, and would not be easy to quickly modify by artists who may wish to tweak the pipeline.</p>
 
             <p>Thus, for our final cel shader, we decided to use an alternative method for multi-tone shading, to enable more than three tones of shading. Rather than using the smoothstep function, we instead converted from the RGB to HSV (Hue, Saturation, Value) colorspace. Thereby, we would have a single variable we could manipulate, the value component, and easily control the degree of shading applied to the surface.</p>
@@ -524,7 +524,85 @@
                 </table>
             </div>
 
-        </o>
+            <h1 align=" middle">References</h1>
+
+            <p><b>Used Unity Engine version 2021.2.19f1. Rendered with Unity's Universal Rendering Pipeline.</b></p>
+
+            <p><b>General tutorials consulted:</b></p>
+
+            <ul>
+                <li>Unity shader tutorial - <a href="https://learn.unity.com/tutorial/writing-your-first-shader-in-unity?uv=5.x#5c7f8528edbc2a002053b570">https://learn.unity.com/tutorial/writing-your-first-shader-in-unity?uv=5.x#5c7f8528edbc2a002053b570</a></li>
+                <li>"Stylized Highlights for Cartoon Rendering and Animation" - <a href="https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.218.6114&rep=rep1&type=pdf">https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.218.6114&rep=rep1&type=pdf</a></li>
+                <li>Advanced  Real-­‐Time  Cel  Shading  Techniques  in  OpenGL - <a href="https://www.cs.rpi.edu/~cutler/classes/advancedgraphics/S12/final_projects/hutchins_kim.pdf">https://www.cs.rpi.edu/~cutler/classes/advancedgraphics/S12/final_projects/hutchins_kim.pdf</a></li>
+            </ul>
+
+            <p><b>Tutorials/Walkthroughs specific to cel shading in Unity:</b></p>
+
+            <ul>
+                <li>How we built the toon shading | Open Projects Devlog (by Unity) - <a href="https://www.youtube.com/watch?v=GGTTHOpUQDE">https://www.youtube.com/watch?v=GGTTHOpUQDE</a></li>
+                <li>Toon Shading - The EASIEST WAY! Unity3D URP Shadergraph Tutorial (Léo Chaumartin) - <a href="https://www.youtube.com/watch?v=Rn_yJ516dVQ">https://www.youtube.com/watch?v=Rn_yJ516dVQ</a></li>
+                <li>Creating a Cel-Shading Toon Shader (by GamesPlusJames) - <a href="https://www.youtube.com/watch?v=3SvyJrENsgc">https://www.youtube.com/watch?v=3SvyJrENsgc</a></li>
+                <li>Unity | Making a Lit Toon Shader in Shader Graph (by MinionsArt) - <a href="https://www.youtube.com/watch?v=FIP6I1x6lMA">https://www.youtube.com/watch?v=FIP6I1x6lMA</a></li>
+                <li>Learn stylized shading with Shader Graph - Unite Copenhagen (by Unity) - <a href="https://www.youtube.com/watch?v=DOLE4nrK97g">https://www.youtube.com/watch?v=DOLE4nrK97g</a></li>
+                <li></li>
+                <li>How to make  Water Shader in Unity with URP! (Tutorial) - <a href="https://www.youtube.com/watch?v=FWO4k4-vXXA">https://www.youtube.com/watch?v=FWO4k4-vXXA</a></li>
+            </ul>
+
+            <p><b>Other Resources</b></p>
+            <ul>
+                <li>Make a Third Person Camera and Movement Controller in 7 Minutes | Unity Tutorial (or Download) - <a href="https://youtu.be/7nxpDwnU0uU">https://youtu.be/7nxpDwnU0uU</a></li>
+                <li>How to Make the Camera See Through Walls | Unity Tutorial (and File Download) - <a href="https://youtu.be/wWyx7_cIxP8?t=189">https://youtu.be/wWyx7_cIxP8?t=189</a></li> 
+                <li>How to Animate Characters in Unity 3D | Two Dimensional Blend Trees Explained - <a href="https://youtu.be/W0eRZGS6dhQ">https://youtu.be/W0eRZGS6dhQ</a></li>
+                <li>Doom-esque model + animations obtained from <a href="https://www.mixamo.com/#/">https://www.mixamo.com/#/</a> </li>
+                <li>VGDD 3D Base Project - <a href="https://github.com/berkeleyGamedev/3DTutorialBase">https://github.com/berkeleyGamedev/3DTutorialBase</a></li>
+            </ul>
+
+            <p><b>Unity Asset Store</b></p>
+
+            <ul>
+                <li>Shotgun model - <a href="https://assetstore.unity.com/packages/3d/props/guns/shotgun-26685#description">https://assetstore.unity.com/packages/3d/props/guns/shotgun-26685#description</a></li>
+                <li>Space Robot Kyle model - <a href="https://assetstore.unity.com/packages/3d/characters/robots/space-robot-kyle-4696#description">https://assetstore.unity.com/packages/3d/characters/robots/space-robot-kyle-4696#description</a></li>
+                <li>Rifle model - <a href="https://assetstore.unity.com/packages/3d/props/guns/rifle-25668#description">https://assetstore.unity.com/packages/3d/props/guns/rifle-25668#description</a></li>
+                <li>Handpainted Keys Model - <a href="https://assetstore.unity.com/packages/3d/handpainted-keys-42044#description">https://assetstore.unity.com/packages/3d/handpainted-keys-42044#description</a></li>
+                <li>3D Free Modular Kit - <a href="https://assetstore.unity.com/packages/3d/environments/3d-free-modular-kit-85732">https://assetstore.unity.com/packages/3d/environments/3d-free-modular-kit-85732</a></li>
+                <li>Yughues Free Metal Materials - <a href="https://assetstore.unity.com/packages/2d/textures-materials/metals/yughues-free-metal-materials-12949">https://assetstore.unity.com/packages/2d/textures-materials/metals/yughues-free-metal-materials-12949</a></li>
+            </ul>
+
+            <h1 align=" middle">Team Credits</h1>
+
+            <p><b>Kevin Ponce:</b></p>
+            <ul>
+                <li>Recreated a simple level from Doom</li>
+                <li>Added a flash to the weapon</li>
+                <li>Recreated a glass shader</li>
+                <li>Created video and took screenshots for final writeup</li>
+                <li>Composed website's initial HTML</li>
+            </ul>
+
+            <p><b>Lena Jeon:</b></p>
+            <ul>
+                <li>Project coordinator, team manager, came up with the project idea</li>
+                <li>Toon Shader versions 1 and 2 (used in the project milestone and as basis for version 3)</li>
+                <li>Water shader</li>
+                <li>Writeup: General edits, finalized HTML, wrote the Water Shader and Toon Shader v1 & v2 sections</li>
+            </ul>
+
+            <p><b>Henry La:</b></p>
+            <ul>
+                <li>Improved player movement</li>
+                <li>Added camera obstruction detection and vertical movement</li>
+                <li>Created animation blend trees and layering</li>
+                <li>Implemented combat and shooting system</li>
+                <li>Coded enemy AI</li>
+            </ul>
+
+            <p><b>Hamza Mohammed:</b></p>
+            <ul>
+                <li>Toonshader version 3 with specular reflections, rim lighting, and multi-tone shading</li>
+                <li>Modified cel shader to include stripped pattern specular reflections and use color conversion method for shading</li>
+                <li>Writeup: Contributed to the technical approach section (high level overview, rim-lighting, specular reflections, comparison of cel shaders, and edits to section 2.1)</li>
+            </ul>
+
     </div>
 </body>
 </html>
